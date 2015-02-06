@@ -11,11 +11,13 @@
 // /ksmr/alive/request i(portNumber), s(Label)
 // /ksmr/alive/response s(stateLabel)
 
-void ofxKsmrAliveManager::setup(int deadTimeMillis,int notResTimeMillis,int port){
+void ofxKsmrAliveManager::setup(string addr,int deadTimeMillis,int notResTimeMillis,int port){
 
+	announceAddr = addr;
 	dead_time_millis = deadTimeMillis;
 	not_res_time_millis = notResTimeMillis;
 	call_interval_millis = 500;
+	master_port = port;
 	receiver.setup(port);
 
 }
@@ -68,7 +70,16 @@ void ofxKsmrAliveManager::update(){
 
 	//Alive Check
 	if (ofGetElapsedTimeMillis() - lastCallMillis > call_interval_millis){
+		lastCallMillis = ofGetElapsedTimeMillis();
 
+		//Announcement
+		sender.setup(announceAddr, 12555);
+		ofxOscMessage ann;
+		ann.setAddress("/ksmr/alive/master/announce");
+		ann.addIntArg(master_port);
+		sender.sendMessage(ann);
+
+		//Client check
 		for (int i = 0;i < clients.size();i++){
 
 			if (clients[i]->state == KSMR_STATE_ALIVE){

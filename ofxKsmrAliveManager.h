@@ -9,7 +9,6 @@
 #ifndef __necVideoTrigger__ofxKsmrAliveManager__
 #define __necVideoTrigger__ofxKsmrAliveManager__
 
-#include "ofxXmlSettings.h"
 #include "ofxOsc.h"
 #include "ofMain.h"
 
@@ -24,7 +23,8 @@ enum ksmrAliveState{
 class ofxKsmrAliveManager{
 public:
 
-	void setup(int deadTimeMillis = 1000,
+	void setup(string addr,
+			   int deadTimeMillis = 1000,
 			   int notResTimeMillis = 500,
 			   int port = 12444);
 	void update();
@@ -41,6 +41,9 @@ public:
 
 	unsigned long long lastCallMillis;
 
+	string announceAddr;
+
+	int master_port;
 	int call_interval_millis;
 	int not_res_time_millis;
 	int dead_time_millis;
