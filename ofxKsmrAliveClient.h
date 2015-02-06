@@ -26,6 +26,8 @@ public:
 	void draw();
 	void setState(string state){stateLabel = state;};
 
+	void onExit();
+	
 	ofxOscReceiver	receiver;
 	ofxOscSender	sender;
 

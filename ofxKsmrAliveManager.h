@@ -38,7 +38,9 @@ public:
 	bool				clientIsExist(string address);
 	void				removeClient(string address);
 	ksmrRemoteClient*	getClient(string address);
-
+	
+	void call(ksmrRemoteClient* client);
+	
 	unsigned long long lastCallMillis;
 
 	string announceAddr;
@@ -59,6 +61,7 @@ public:
 		state = KSMR_STATE_ALIVE;
 		calledTime = 0;
 		waitTime = 0;
+		deadCounter = 0;
 		regMillis = ofGetElapsedTimeMillis();
 	}
 
@@ -67,6 +70,7 @@ public:
 	}
 
 	ksmrAliveState state;
+	int		deadCounter;
 	int		calledTime;
 	int		waitTime;
 	int		port;

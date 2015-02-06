@@ -6,6 +6,8 @@
 //
 //
 
+//TODO: マスターから一定時間コールが無かったらHollow状態に戻る
+
 #include "ofxKsmrAliveClient.h"
 
 void ofxKsmrAliveClient::setup(int port){
@@ -15,6 +17,7 @@ void ofxKsmrAliveClient::setup(int port){
 	clientPort = port;
 	receiver.setup(clientPort);
 	stateLabel = "Healthy";
+
 }
 
 void ofxKsmrAliveClient::update(){
@@ -24,14 +27,18 @@ void ofxKsmrAliveClient::update(){
 
 		if (m.getAddress() == "/ksmr/alive/master/announce"){
 
-			state = KSMR_CSTATE_FIND_MASTER;
-			sender.setup(m.getRemoteIp(), m.getArgAsInt32(0));
+			if (state == KSMR_CSTATE_HOLLOW){
+				state = KSMR_CSTATE_FIND_MASTER;
+				sender.setup(m.getRemoteIp(), m.getArgAsInt32(0));
+			}
 
 		}
 
 		if (m.getAddress() == "/ksmr/alive/master/catch"){
-
-			state = KSMR_CSTATE_CATCHED;
+			
+			if (state == KSMR_CSTATE_FIND_MASTER){
+				state = KSMR_CSTATE_CATCHED;
+			}
 
 		}
 
@@ -49,7 +56,8 @@ void ofxKsmrAliveClient::update(){
 
 	//Send request
 	if ((state == KSMR_CSTATE_FIND_MASTER) &&
-		(ofGetElapsedTimeMillis() - last_req < request_interval)){
+		(ofGetElapsedTimeMillis() - last_req > request_interval)){
+		last_req = ofGetElapsedTimeMillis();
 		ofxOscMessage req;
 		req.setAddress("/ksmr/alive/request");
 		req.addIntArg(clientPort);
@@ -60,4 +68,10 @@ void ofxKsmrAliveClient::update(){
 
 void ofxKsmrAliveClient::draw(){
 
+}
+
+void ofxKsmrAliveClient::onExit(){
+	ofxOscMessage req;
+	req.setAddress("/ksmr/alive/disconnect");
+	sender.sendMessage(req);
 }

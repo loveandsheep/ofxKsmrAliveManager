@@ -42,6 +42,15 @@ void ofxKsmrAliveManager::update(){
 				ret.setAddress("/ksmr/alive/master/catch");
 				sender.sendMessage(ret);
 
+			}else{
+				
+				ksmrRemoteClient* cl = getClient(msg.getRemoteIp());
+				
+				sender.setup(cl->address, cl->port);
+				ofxOscMessage ret;
+				ret.setAddress("/ksmr/alive/master/catch");
+				sender.sendMessage(ret);
+				
 			}
 
 		}
@@ -83,20 +92,16 @@ void ofxKsmrAliveManager::update(){
 		for (int i = 0;i < clients.size();i++){
 
 			if (clients[i]->state == KSMR_STATE_ALIVE){
-
-				sender.setup(clients[i]->address, clients[i]->port);
-				ofxOscMessage msg;
-				msg.setAddress("/ksmr/alive/master/call");
-				sender.sendMessage(msg);
+				
+				call(clients[i]);
 				clients[i]->state = KSMR_STATE_CALLED;
-				clients[i]->calledTime = ofGetElapsedTimeMillis();
 
 			}else if (clients[i]->state == KSMR_STATE_CALLED){
 
 				clients[i]->waitTime = ofGetElapsedTimeMillis() - clients[i]->calledTime;
 
 				if (clients[i]->waitTime > not_res_time_millis){
-					clients[i]->state == KSMR_STATE_NOT_RES;
+					clients[i]->state = KSMR_STATE_NOT_RES;
 				}
 
 			}else if (clients[i]->state == KSMR_STATE_NOT_RES){
@@ -104,9 +109,14 @@ void ofxKsmrAliveManager::update(){
 				clients[i]->waitTime = ofGetElapsedTimeMillis() - clients[i]->calledTime;
 
 				if (clients[i]->waitTime > dead_time_millis){
-					clients[i]->state == KSMR_STATE_DEAD;
+					clients[i]->state = KSMR_STATE_DEAD;
+					clients[i]->deadCounter++;
 				}
 
+			}else if (clients[i]->state == KSMR_STATE_DEAD){
+
+				call(clients[i]);
+				
 			}
 
 		}
@@ -120,10 +130,43 @@ void ofxKsmrAliveManager::draw(int x,int y){
 	ofTranslate(x, y);
 
 	for (int i = 0;i < clients.size();i++){
+		
+		switch (clients[i]->state) {
+			case KSMR_STATE_ALIVE:
+				ofSetHexColor(0x7FD5AB);
+				break;
+			case KSMR_STATE_CALLED:
+				ofSetHexColor(0x7FE4Ab);
+				break;
+			case KSMR_STATE_NOT_RES:
+				ofSetHexColor(0xFF8C56);
+				break;
+			case KSMR_STATE_DEAD:
+				ofSetHexColor(0xE60D44);
+				break;
+		}
+		ofRect(0, i*120, 200, 120);
+		
+		ofSetColor(255);
 		ofNoFill();
 		ofRect(0, i*120, 200,120);
 		ofFill();
-		ofDrawBitmapString(clients[i]->address, 20,20);
+		string info = "";
+		info += clients[i]->address + "\n";
+		
+		if (clients[i]->state == KSMR_STATE_ALIVE)
+			info += "State :Alive\n";
+		if (clients[i]->state == KSMR_STATE_CALLED)
+			info += "State :Called\n";
+		if (clients[i]->state == KSMR_STATE_NOT_RES)
+			info += "State :Not Respond\n";
+		if (clients[i]->state == KSMR_STATE_DEAD)
+			info += "State :Dead\n";
+		
+		info += "Dead count :" + ofToString(clients[i]->deadCounter) + "\n";
+		info += "StateLabel :" + clients[i]->stateLabel + "\n";
+		
+		ofDrawBitmapString(info, 20,20);
 	}
 
 	ofPopMatrix();
@@ -165,4 +208,12 @@ void ofxKsmrAliveManager::removeClient(string address){
 		delete cl;
 	}
 
+}
+
+void ofxKsmrAliveManager::call(ksmrRemoteClient *client){
+	sender.setup(client->address, client->port);
+	ofxOscMessage msg;
+	msg.setAddress("/ksmr/alive/master/call");
+	sender.sendMessage(msg);
+	client->calledTime = ofGetElapsedTimeMillis();
 }
