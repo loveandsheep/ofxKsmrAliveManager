@@ -114,7 +114,19 @@ void ofxKsmrAliveManager::update(){
 	}
 }
 
-void ofxKsmrAliveManager::draw(){
+void ofxKsmrAliveManager::draw(int x,int y){
+
+	ofPushMatrix();
+	ofTranslate(x, y);
+
+	for (int i = 0;i < clients.size();i++){
+		ofNoFill();
+		ofRect(0, i*120, 200,120);
+		ofFill();
+		ofDrawBitmapString(clients[i]->address, 20,20);
+	}
+
+	ofPopMatrix();
 
 }
 

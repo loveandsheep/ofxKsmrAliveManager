@@ -28,7 +28,7 @@ public:
 			   int notResTimeMillis = 500,
 			   int port = 12444);
 	void update();
-	void draw();
+	void draw(int x,int y);
 
 	ofxOscReceiver	receiver;
 	ofxOscSender	sender;
