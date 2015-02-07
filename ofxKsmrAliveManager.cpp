@@ -20,7 +20,7 @@ void ofxKsmrAliveManager::setup(string addr,int deadTimeMillis,int notResTimeMil
 	master_port = port;
 	receiver.setup(port);
 	
-	
+	ofAddListener(ofEvents().exit, this, &ofxKsmrAliveManager::exit);
 }
 
 void ofxKsmrAliveManager::update(){
@@ -219,4 +219,16 @@ void ofxKsmrAliveManager::call(ksmrRemoteClient *client){
 	msg.setAddress("/ksmr/alive/master/call");
 	sender.sendMessage(msg);
 	client->calledTime = ofGetElapsedTimeMillis();
+}
+
+void ofxKsmrAliveManager::exit(ofEventArgs &arg){
+	
+	for (int i = 0;i < clients.size();i++){
+		
+		ofxOscMessage msg;
+		msg.setAddress("/ksmr/alive/master/disconnect");
+		sender.sendMessage(msg);
+		
+	}
+	
 }

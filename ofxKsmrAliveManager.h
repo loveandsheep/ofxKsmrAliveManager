@@ -29,6 +29,8 @@ public:
 			   int port = 12444);
 	void update();
 	void draw(int x,int y);
+	void exit(ofEventArgs &arg);
+	void mousePressed(ofMouseEventArgs &A);
 
 	ofxOscReceiver	receiver;
 	ofxOscSender	sender;

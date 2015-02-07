@@ -19,6 +19,8 @@ void ofxKsmrAliveClient::setup(string name,int port){
 	master_port = 0;
 	clientName = name;
 	
+	ofAddListener(ofEvents().exit, this, &ofxKsmrAliveClient::onExit);
+	
 }
 
 void ofxKsmrAliveClient::update(){
@@ -60,6 +62,12 @@ void ofxKsmrAliveClient::update(){
 			sender.sendMessage(res);
 
 		}
+		
+		if (m.getAddress() == "/ksmr/alive/master/disconnect"){
+			
+			state = KSMR_CSTATE_HOLLOW;
+			
+		}
 
 	}
 
@@ -84,7 +92,7 @@ void ofxKsmrAliveClient::draw(){
 
 }
 
-void ofxKsmrAliveClient::onExit(){
+void ofxKsmrAliveClient::onExit(ofEventArgs &arg){
 	if (master_addr != ""){
 		ofxOscMessage req;
 		req.setAddress("/ksmr/alive/disconnect");
