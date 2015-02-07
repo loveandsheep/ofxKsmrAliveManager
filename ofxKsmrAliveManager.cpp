@@ -9,7 +9,7 @@
 #include "ofxKsmrAliveManager.h"
 
 // /ksmr/alive/request i(portNumber), s(Label)
-// /ksmr/alive/response s(stateLabel)
+// /ksmr/alive/response s(stateLabel),
 
 void ofxKsmrAliveManager::setup(string addr,int deadTimeMillis,int notResTimeMillis,int port){
 
@@ -19,7 +19,8 @@ void ofxKsmrAliveManager::setup(string addr,int deadTimeMillis,int notResTimeMil
 	call_interval_millis = 500;
 	master_port = port;
 	receiver.setup(port);
-
+	
+	
 }
 
 void ofxKsmrAliveManager::update(){
@@ -34,6 +35,7 @@ void ofxKsmrAliveManager::update(){
 			if (!clientIsExist(msg.getRemoteIp())){
 
 				ksmrRemoteClient* cl = new ksmrRemoteClient(msg.getRemoteIp(),
+															msg.getArgAsString(1),
 															msg.getArgAsInt32(0));
 				clients.push_back(cl);
 
@@ -163,6 +165,7 @@ void ofxKsmrAliveManager::draw(int x,int y){
 		if (clients[i]->state == KSMR_STATE_DEAD)
 			info += "State :Dead\n";
 		
+		info += "Name :" + clients[i]->name + "\n";
 		info += "Dead count :" + ofToString(clients[i]->deadCounter) + "\n";
 		info += "StateLabel :" + clients[i]->stateLabel + "\n";
 		

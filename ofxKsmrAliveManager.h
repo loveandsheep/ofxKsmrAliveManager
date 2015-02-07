@@ -54,10 +54,11 @@ public:
 class ksmrRemoteClient{
 public:
 
-	ksmrRemoteClient(string _address,int _port = 12555){
+	ksmrRemoteClient(string _address,string _name,int _port = 12555){
 		regMillis = 0;
 		port = _port;
 		address = _address;
+		name = _name;
 		state = KSMR_STATE_ALIVE;
 		calledTime = 0;
 		waitTime = 0;
@@ -76,6 +77,7 @@ public:
 	int		port;
 	string	address;
 	string	stateLabel;
+	string	name;
 
 	unsigned long long	regMillis;
 

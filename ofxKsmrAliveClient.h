@@ -21,7 +21,15 @@ enum ksmrAliveClientState{
 class ofxKsmrAliveClient{
 public:
 
-	void setup(int port = 12555);
+	ofxKsmrAliveClient(){
+		
+	}
+	
+	~ofxKsmrAliveClient(){
+		
+	}
+	
+	void setup(string name,int port = 12555);
 	void update();
 	void draw();
 	void setState(string state){stateLabel = state;};
@@ -33,10 +41,12 @@ public:
 
 	int clientPort;
 	int request_interval;
+	unsigned long long last_called;
 	unsigned long long last_req;
+	string clientName;
 	string stateLabel;
 	string master_addr;
-	string master_port;
+	int master_port;
 	ksmrAliveClientState state;
 };
 
