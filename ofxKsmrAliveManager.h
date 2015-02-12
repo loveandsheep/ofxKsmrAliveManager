@@ -23,7 +23,7 @@ enum ksmrAliveState{
 class ofxKsmrAliveManager{
 public:
 
-	void setup(string addr,
+	void setup(string addr,bool manualMulti = false,
 			   int deadTimeMillis = 1000,
 			   int notResTimeMillis = 500,
 			   int port = 12444);
@@ -46,6 +46,7 @@ public:
 	unsigned long long lastCallMillis;
 
 	string announceAddr;
+	bool manMulti;
 
 	int master_port;
 	int call_interval_millis;
