@@ -11,8 +11,9 @@
 // /ksmr/alive/request i(portNumber), s(Label)
 // /ksmr/alive/response s(stateLabel),
 
-void ofxKsmrAliveManager::setup(string addr,int deadTimeMillis,int notResTimeMillis,int port){
+void ofxKsmrAliveManager::setup(string addr,bool manualMulti,int deadTimeMillis,int notResTimeMillis,int port){
 
+	manMulti = manualMulti;
 	announceAddr = addr;
 	dead_time_millis = deadTimeMillis;
 	not_res_time_millis = notResTimeMillis;
@@ -84,11 +85,21 @@ void ofxKsmrAliveManager::update(){
 		lastCallMillis = ofGetElapsedTimeMillis();
 
 		//Announcement
-		sender.setup(announceAddr, 12555);
-		ofxOscMessage ann;
-		ann.setAddress("/ksmr/alive/master/announce");
-		ann.addIntArg(master_port);
-		sender.sendMessage(ann);
+		if (manMulti){
+			for (int i = 0;i < 255;i++){
+				sender.setup(announceAddr+"."+ofToString(i), 12555);
+				ofxOscMessage ann;
+				ann.setAddress("/ksmr/alive/master/announce");
+				ann.addIntArg(master_port);
+				sender.sendMessage(ann);
+			}
+		}else{
+			sender.setup(announceAddr, 12555);
+			ofxOscMessage ann;
+			ann.setAddress("/ksmr/alive/master/announce");
+			ann.addIntArg(master_port);
+			sender.sendMessage(ann);
+		}
 
 		//Client check
 		for (int i = 0;i < clients.size();i++){
@@ -132,7 +143,8 @@ void ofxKsmrAliveManager::draw(int x,int y){
 	ofTranslate(x, y);
 
 	for (int i = 0;i < clients.size();i++){
-		
+		ofVec2f Offset = ofVec2f((i/4)*200,(i%4)*120);
+
 		switch (clients[i]->state) {
 			case KSMR_STATE_ALIVE:
 				ofSetHexColor(0x7FD5AB);
@@ -147,11 +159,11 @@ void ofxKsmrAliveManager::draw(int x,int y){
 				ofSetHexColor(0xE60D44);
 				break;
 		}
-		ofRect(0, i*120, 200, 120);
+		ofRect(Offset.x, Offset.y, 200, 120);
 		
 		ofSetColor(255);
 		ofNoFill();
-		ofRect(0, i*120, 200,120);
+		ofRect(Offset.x, Offset.y, 200,120);
 		ofFill();
 		string info = "";
 		info += clients[i]->address + "\n";
@@ -169,7 +181,7 @@ void ofxKsmrAliveManager::draw(int x,int y){
 		info += "Dead count :" + ofToString(clients[i]->deadCounter) + "\n";
 		info += "StateLabel :" + clients[i]->stateLabel + "\n";
 		
-		ofDrawBitmapString(info, 20,20);
+		ofDrawBitmapString(info, Offset.x+20,Offset.y+20);
 	}
 
 	ofPopMatrix();
